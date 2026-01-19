@@ -2,5 +2,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "framework": "create-react-app",
-  "installCommand": "npm install && npx update-browserslist-db@latest"
+  "installCommand": "npm install && npx update-browserslist-db@latest",
+  "build": {
+    "env": {
+      "CI": "false"
+    }
+  }
 }

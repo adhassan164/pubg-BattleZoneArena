@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Modal, Form, Alert, InputGroup } from 'react-bootstrap';
-import { collection, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, getDoc, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { sanitizeInput } from '../../utils/security';
 
@@ -10,10 +10,14 @@ function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
   const [walletAmount, setWalletAmount] = useState(0);
   const [currentBalance, setCurrentBalance] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [gameName, setGameName] = useState('');
+  const [position, setPosition] = useState('');
 
   // Fetch users on component mount
   useEffect(() => {
@@ -84,6 +88,8 @@ function UserManagement() {
         setCurrentUserId(userId);
         setCurrentBalance(userData.walletBalance || 0);
         setWalletAmount(0);
+        setGameName('');
+        setPosition('');
         setShowModal(true);
       } else {
         setError('User not found');
@@ -104,23 +110,84 @@ function UserManagement() {
         const userData = userDoc.data();
         const newBalance = (userData.walletBalance || 0) + Number(walletAmount);
         
+        // Update user's wallet balance
         await updateDoc(userRef, {
           walletBalance: newBalance,
           lastUpdated: new Date().toISOString()
         });
         
-        // Refresh users list
+        // Create description based on game name and position
+        let description = 'Reward added by administrator';
+        if (gameName) {
+          description = `Reward for ${gameName}`;
+          if (position) {
+            description += ` - ${position} position`;
+          }
+        }
+        
+        // Add record to rewards collection for history tracking
+        await addDoc(collection(db, 'rewards'), {
+          userId: currentUserId,
+          userEmail: userData.email,
+          amount: Number(walletAmount),
+          description: description,
+          gameName: gameName || null,
+          position: position || null,
+          addedBy: 'Administrator',
+          timestamp: serverTimestamp(),
+          previousBalance: userData.walletBalance || 0,
+          newBalance: newBalance
+        });
+        
+        // Refresh users list and reset form fields
         fetchUsers();
         setShowModal(false);
+        setGameName('');
+        setPosition('');
       }
     } catch (error) {
       setError('Failed to update wallet: ' + error.message);
     }
   }
 
+  function openDeleteModal(userId, userEmail) {
+    setCurrentUserId(userId);
+    setCurrentUserEmail(userEmail);
+    setShowDeleteModal(true);
+  }
+
+  async function handleDeleteUser() {
+    if (!currentUserId) return;
+
+    try {
+      // Delete the user document from Firestore
+      await deleteDoc(doc(db, 'users', currentUserId));
+      
+      // Refresh users list and close modal
+      fetchUsers();
+      setShowDeleteModal(false);
+      setError('');
+    } catch (error) {
+      setError('Failed to delete user: ' + error.message);
+    }
+  }
+
   return (
     <Container className="py-5">
       <h1 className="mb-4">User Management</h1>
+      
+      <div className="mb-4">
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">
+            Total Users: <span className="text-primary fw-bold">{users.length}</span>
+            {searchQuery && filteredUsers.length !== users.length && (
+              <span className="text-muted ms-2">
+                (Showing {filteredUsers.length} of {users.length})
+              </span>
+            )}
+          </h5>
+        </div>
+      </div>
       
       {error && <Alert variant="danger">{error}</Alert>}
       
@@ -177,8 +244,16 @@ function UserManagement() {
                       variant="success" 
                       size="sm"
                       onClick={() => openWalletModal(user.id)}
+                      className="me-2"
                     >
-                      Add Funds
+                      Add Rewards
+                    </Button>
+                    <Button 
+                      variant="danger" 
+                      size="sm"
+                      onClick={() => openDeleteModal(user.id, user.email)}
+                    >
+                      Delete
                     </Button>
                   </td>
                 </tr>
@@ -191,7 +266,7 @@ function UserManagement() {
       {/* Add Funds Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Add Funds to Wallet</Modal.Title>
+          <Modal.Title>Add Funds to Wallet (Rewards)</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -205,7 +280,30 @@ function UserManagement() {
             </Form.Group>
             
             <Form.Group className="mb-3">
-              <Form.Label>Amount to Add (Rs.)</Form.Label>
+              <Form.Label>Game Name</Form.Label>
+              <Form.Control 
+                type="text" 
+                value={gameName} 
+                onChange={(e) => setGameName(e.target.value)} 
+                placeholder="Enter game name (optional)" 
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Position</Form.Label>
+              <Form.Select
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+              >
+                <option value="">Select position (optional)</option>
+                <option value="1st">1st Position</option>
+                <option value="2nd">2nd Position</option>
+                <option value="3rd">3rd Position</option>
+              </Form.Select>
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Reward Amount to Add (Rs.)</Form.Label>
               <Form.Control 
                 type="number" 
                 value={walletAmount} 
@@ -234,7 +332,31 @@ function UserManagement() {
             onClick={handleAddFunds}
             disabled={walletAmount <= 0}
           >
-            Add Funds
+            Add Rewards
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete User Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete User Account</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Alert variant="danger">
+            <p>Are you sure you want to delete the user account: <strong>{currentUserEmail}</strong>?</p>
+            <p>This action cannot be undone and will permanently remove the user&apos;s account and all associated data.</p>
+          </Alert>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="danger" 
+            onClick={handleDeleteUser}
+          >
+            Delete User
           </Button>
         </Modal.Footer>
       </Modal>

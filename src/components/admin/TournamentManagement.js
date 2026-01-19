@@ -5,6 +5,7 @@ import { db } from '../../firebase/config';
 import TournamentStatusService from '../../services/TournamentStatusService';
 import initCloudinary from '../../utils/cloudinaryConfig';
 import DOMPurify from 'dompurify';
+import { toast } from 'react-toastify';
 
 function TournamentManagement() {
   const [tournaments, setTournaments] = useState([]);
@@ -26,6 +27,7 @@ function TournamentManagement() {
     tournamentTime: '',
     entryFee: 0,
     prizePool: 0,
+    perKillAmount: 0,
     maxParticipants: 100,
     matchDetails: '',
     rules: '',
@@ -161,7 +163,7 @@ function TournamentManagement() {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'entryFee' || name === 'prizePool' || name === 'maxParticipants' 
+      [name]: name === 'entryFee' || name === 'maxParticipants' || name === 'perKillAmount'
         ? Number(value) 
         : value
     });
@@ -174,13 +176,16 @@ function TournamentManagement() {
       tournamentDate: '',
       tournamentTime: '',
       entryFee: 0,
-      prizePool: 0,
+      prizePool: '',
+      perKillAmount: 0,
       maxParticipants: 100,
       matchDetails: '',
       rules: '',
       status: 'upcoming',
       resultImage: '',
-      gameLogo: '' // Initialize game logo field
+      gameLogo: '', // Initialize game logo field
+      map: '', // Initialize map field
+      version: '' // Initialize version field
     });
     setEditMode(false);
     setShowModal(true);
@@ -201,13 +206,16 @@ function TournamentManagement() {
       tournamentDate,
       tournamentTime,
       entryFee: tournament.entryFee || 0,
-      prizePool: tournament.prizePool || 0,
+      prizePool: tournament.prizePool || '',
+      perKillAmount: tournament.perKillAmount || 0,
       maxParticipants: tournament.maxParticipants || 100,
       matchDetails: tournament.matchDetails || '',
       rules: tournament.rules || '',
       status: tournament.status || 'upcoming',
       resultImage: tournament.resultImage || '',
-      gameLogo: tournament.gameLogo || '' // Load existing game logo
+      gameLogo: tournament.gameLogo || '', // Load existing game logo
+      map: tournament.map || '', // Load existing map
+      version: tournament.version || '' // Load existing version
     });
     setCurrentTournamentId(tournament.id);
     setEditMode(true);
@@ -272,6 +280,41 @@ function TournamentManagement() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+  
+  async function handleRemoveParticipant(participantIndex) {
+    if (!selectedTournament || !selectedTournament.participants) {
+      return;
+    }
+    
+    if (window.confirm('Are you sure you want to remove this participant from the tournament?')) {
+      try {
+        // Create a new array without the participant to be removed
+        const updatedParticipants = [...selectedTournament.participants];
+        updatedParticipants.splice(participantIndex, 1);
+        
+        // Update the tournament document in Firestore
+        const tournamentRef = doc(db, 'tournaments', selectedTournament.id);
+        await updateDoc(tournamentRef, {
+          participants: updatedParticipants
+        });
+        
+        // Update the local state
+        setSelectedTournament({
+          ...selectedTournament,
+          participants: updatedParticipants
+        });
+        
+        // Refresh the tournaments list
+        fetchTournaments();
+        
+        // Show success message
+        toast.success('Participant removed successfully');
+      } catch (error) {
+        console.error('Error removing participant:', error);
+        toast.error('Failed to remove participant: ' + error.message);
+      }
+    }
   }
 
   async function handleSubmit(e) {
@@ -566,6 +609,33 @@ function TournamentManagement() {
             <div className="row">
               <div className="col-md-6">
                 <Form.Group className="mb-3">
+                  <Form.Label>Map</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    name="map" 
+                    value={formData.map} 
+                    onChange={handleInputChange} 
+                    placeholder="Enter game map (optional)" 
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Version</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    name="version" 
+                    value={formData.version} 
+                    onChange={handleInputChange} 
+                    placeholder="Enter game version (optional)" 
+                  />
+                </Form.Group>
+              </div>
+            </div>
+            
+            <div className="row">
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
                   <Form.Label>Tournament Date</Form.Label>
                   <Form.Control 
                     type="date" 
@@ -608,11 +678,10 @@ function TournamentManagement() {
                 <Form.Group className="mb-3">
                   <Form.Label>Prize Pool (Rs.)</Form.Label>
                   <Form.Control 
-                    type="number" 
+                    type="text" 
                     name="prizePool" 
                     value={formData.prizePool} 
                     onChange={handleInputChange} 
-                    min="0" 
                     required 
                   />
                 </Form.Group>
@@ -628,6 +697,24 @@ function TournamentManagement() {
                     min="1" 
                     required 
                   />
+                </Form.Group>
+              </div>
+            </div>
+            
+            <div className="row">
+              <div className="col-md-4">
+                <Form.Group className="mb-3">
+                  <Form.Label>Per Kill (Rs.)</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    name="perKillAmount" 
+                    value={formData.perKillAmount} 
+                    onChange={handleInputChange} 
+                    min="0" 
+                  />
+                  <Form.Text className="text-muted">
+                    Optional: Amount awarded per kill
+                  </Form.Text>
                 </Form.Group>
               </div>
             </div>
@@ -966,6 +1053,7 @@ function TournamentManagement() {
                   <th>Email</th>
                   <th>Game Username</th>
                   <th>Joined At</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -983,6 +1071,15 @@ function TournamentManagement() {
                       )}
                     </td>
                     <td>{new Date(participant.joinedAt).toLocaleString()}</td>
+                    <td>
+                      <Button 
+                        variant="danger" 
+                        size="sm"
+                        onClick={() => handleRemoveParticipant(index)}
+                      >
+                        Remove
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

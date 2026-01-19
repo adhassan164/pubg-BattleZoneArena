@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Container is removed as it's not being used
 import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Bootstrap CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -20,6 +22,7 @@ import PrivateRoute from './components/auth/ProtectedRoute';
 
 // Common Components
 import NavigationBar from './components/common/Navbar';
+import BottomNavBar from './components/common/BottomNavBar';
 import Footer from './components/common/Footer';
 import HomePage from './components/common/HomePage';
 
@@ -31,6 +34,7 @@ import UserProfile from './components/user/UserProfile';
 import TournamentDetails from './components/user/TournamentDetails';
 import WithdrawalHistory from './components/user/WithdrawalHistory';
 import RechargeHistory from './components/user/RechargeHistory';
+import RewardsHistory from './components/user/RewardsHistory';
 
 // Admin Components
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -118,6 +122,14 @@ function App() {
                 } 
               />
               <Route 
+                path="/rewards-history" 
+                element={
+                  <PrivateRoute>
+                    <RewardsHistory />
+                  </PrivateRoute>
+                } 
+              />
+              <Route 
                 path="/create-tournament" 
                 element={
                   <PrivateRoute>
@@ -200,8 +212,10 @@ function App() {
                 } 
               />
             </Routes>
-          </div>
-          <Footer />
+            </div>
+            <Footer />
+            <BottomNavBar />
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
         </div>
       </AuthProvider>
     </Router>

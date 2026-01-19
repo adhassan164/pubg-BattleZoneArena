@@ -24,11 +24,16 @@ function Footer() {
           <Col xs={12} sm={12} md={4}>
             <h5 className="mb-3">Contact Us</h5>
             <p className="text-muted">
-              Email: sarmadnaeem222@gmail.com<br />
+              Email: gamearena.pk@gmail.com<br />
               {/* Discord: PUBGTournaments#1234 */}
             </p>
              <p className="text-muted">
-              join on Whatsapp Chanel for announcements: https://whatsapp.com/channel/0029VbBMC8f1t90YcV2HDY2t<br />
+              join on Whatsapp group for Pubg Game announcements: https:https://chat.whatsapp.com/IiBXpGYmhQm6s0kI7mEfVD?mode=ac_t<br />
+              {/* Discord: PUBGTournaments#1234 */}
+            </p>
+           
+             <p className="text-muted">
+              join on Whatsapp group for Free Fire Game announcements: https://chat.whatsapp.com/InEuN9DrYHwEke6UN7Uz4S?mode=ac_t<br />
               {/* Discord: PUBGTournaments#1234 */}
             </p>
           </Col>

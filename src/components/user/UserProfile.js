@@ -140,12 +140,28 @@ function UserProfile() {
                   <Button 
                     variant="outline-secondary"
                     size="sm"
-                    className="mb-2"
+                    className="me-2 mb-2"
                     onClick={() => navigate('/withdrawal-history')}
                   >
                     Withdraw History
                   </Button>
+                  <Button 
+                    variant="outline-info"
+                    size="sm"
+                    className="mb-2"
+                    onClick={() => navigate('/rewards-history')}
+                  >
+                    Rewards History
+                  </Button>
                 </div>
+                
+                <hr />
+                
+                <h6 className="fs-6">Rewards</h6>
+                <p className="small">
+                  Any rewards or bonuses added to your account by administrators will be reflected in your wallet balance.
+                  Click on the &quot;Rewards History&quot; button to view all rewards received.
+                </p>
                 
                 <hr />
                 
@@ -174,6 +190,10 @@ function UserProfile() {
           
           <Form>
             <CSRFToken />
+            
+            <Alert variant="danger" className="p-2 small mb-3">
+              <span style={{ color: 'red', fontWeight: 'bold' }}>payment will not be sent on jazzcash.</span>
+            </Alert>
             
             <Form.Group className="mb-3">
               <Form.Label className="small">Available Balance</Form.Label>
@@ -225,16 +245,16 @@ function UserProfile() {
               <Form.Label className="small">Withdrawal Amount (Rs.)</Form.Label>
               <Form.Control 
                 type="number" 
-                placeholder="Enter amount to withdraw (min 100 Rs.)" 
+                placeholder="Enter amount to withdraw (min 300 Rs.)" 
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
-                min="100"
+                min="300"
                 max={userData?.walletBalance || 0}
                 required 
                 className="form-control-sm"
               />
               <Form.Text className="text-muted small">
-                Minimum withdrawal amount is 100 Rs.
+                Minimum withdrawal amount is 300 Rs.
               </Form.Text>
             </Form.Group>
           </Form>
@@ -246,7 +266,7 @@ function UserProfile() {
           <Button 
             variant="primary" 
             onClick={handleWithdrawRequest}
-            disabled={!withdrawAmount || withdrawAmount < 100 || withdrawAmount > userData?.walletBalance || !accountName || !accountNumber || !bankName}
+            disabled={!withdrawAmount || withdrawAmount < 300 || withdrawAmount > userData?.walletBalance || !accountName || !accountNumber || !bankName}
             size="sm"
             className="px-3"
           >
@@ -281,8 +301,8 @@ function UserProfile() {
       }
       
       // Validate minimum withdrawal amount
-      if (withdrawAmount < 100) {
-        setError('Minimum withdrawal amount is 100 Rs.');
+      if (withdrawAmount < 300) {
+        setError('Minimum withdrawal amount is 300 Rs.');
         return;
       }
       

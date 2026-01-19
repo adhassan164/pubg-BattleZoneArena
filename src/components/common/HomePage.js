@@ -69,9 +69,9 @@ function HomePage() {
         <Container>
           <Row className="align-items-center">
             <Col xs={12} md={6} className="mb-4 mb-md-0">
-              <h1 className="gaming-title display-4">PUBG Tournaments</h1>
+              <h1 className="gaming-title display-4">Game Arena</h1>
               <p className="gaming-subtitle lead">
-                Join exciting tournaments for PUBG, 8 Ball Pool, and other multiplayer games.
+                Join exciting tournaments for PUBG, Free Fire, Ludo, 8 Ball Pool, and other multiplayer games.
                 Compete with players worldwide and win amazing prizes!
               </p>
               <div className="d-flex flex-column flex-md-row gap-2 gap-md-3 mt-4">
@@ -140,6 +140,16 @@ function HomePage() {
                           <Card.Title>Rs. {tournament.prizePool} Prize Pool</Card.Title>
                           <Card.Text>
                             {tournament.gameType} tournament with exciting prizes!
+                            {tournament.map && (
+                              <div className="mt-2">
+                                <strong>Map:</strong> {tournament.map}
+                              </div>
+                            )}
+                            {tournament.version && (
+                              <div>
+                                <strong>Version:</strong> {tournament.version}
+                              </div>
+                            )}
                           </Card.Text>
                           <Link to={`/tournaments/${tournament.id}`}>
                             <Button className="gaming-btn">View Details</Button>

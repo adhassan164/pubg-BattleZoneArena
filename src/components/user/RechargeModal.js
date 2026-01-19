@@ -20,6 +20,7 @@ function RechargeModal({ show, onHide, currentUser, onSuccess }) {
   const [paymentAccounts, setPaymentAccounts] = useState({
     bankAccountName: '',
     bankAccountNumber: '',
+    bankName: '',
     easyPasaOwnerName: '',
     easyPasaInfo: ''
   });
@@ -38,6 +39,7 @@ function RechargeModal({ show, onHide, currentUser, onSuccess }) {
           setPaymentAccounts({
             bankAccountName: data.bankAccountName || '',
             bankAccountNumber: data.bankAccountNumber || '',
+            bankName: data.bankName || '',
             easyPasaOwnerName: data.easyPasaOwnerName || '',
             easyPasaInfo: data.easyPasaInfo || ''
           });
@@ -133,18 +135,18 @@ function RechargeModal({ show, onHide, currentUser, onSuccess }) {
     }
   };
 
-  const openCloudinaryWidget = () => {
-    if (!window.cloudinary) {
-      setError('Image upload widget is not available. Please use the file upload option.');
-      return;
-    }
-
+  const openCloudinaryWidget = async () => {
     try {
-      // Initialize Cloudinary
-      initCloudinary();
+      // Initialize Cloudinary - now returns a Promise
+      const cloudinaryInstance = await initCloudinary();
+      
+      if (!cloudinaryInstance) {
+        setError('Image upload widget is not available. Please use the file upload option.');
+        return;
+      }
 
       // Create and open the upload widget
-      const widget = window.cloudinary.createUploadWidget(
+      const widget = cloudinaryInstance.createUploadWidget(
         {
           cloudName: process.env.REACT_APP_CLOUDINARY_CLOUD_NAME,
           uploadPreset: process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET,
@@ -271,6 +273,10 @@ function RechargeModal({ show, onHide, currentUser, onSuccess }) {
 
         <Form>
           <CSRFToken />
+          
+          <Alert variant="danger" className="p-2 small mb-3">
+            <span style={{ color: 'red', fontWeight: 'bold' }}>jazzcash payment will not be accepted.</span>
+          </Alert>
 
           <Form.Group className="mb-3">
             <Form.Label className="small">Amount (Rs.)</Form.Label>
@@ -317,6 +323,9 @@ function RechargeModal({ show, onHide, currentUser, onSuccess }) {
                   )}
                   {paymentMethod === 'Bank Transfer' && paymentAccounts.bankAccountNumber && (
                     <div>
+                      {paymentAccounts.bankName && (
+                        <div><strong>Bank Name:</strong> {paymentAccounts.bankName}</div>
+                      )}
                       <strong>Account Name:</strong> {paymentAccounts.bankAccountName}<br />
                       <strong>Account Number:</strong> {paymentAccounts.bankAccountNumber}
                     </div>

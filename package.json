@@ -31,7 +31,8 @@
     "eject": "react-scripts eject",
     "security-audit": "node scripts/security-audit.js",
     "npm-audit": "npm audit --production",
-    "lint": "eslint src/**/*.{js,jsx}"
+    "lint": "eslint src/**/*.{js,jsx}",
+    "postinstall": "npx update-browserslist-db@latest"
   },
   "browserslist": {
     "production": [

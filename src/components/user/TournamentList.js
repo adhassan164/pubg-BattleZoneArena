@@ -39,7 +39,7 @@ function TournamentList() {
         // Fetch tournaments after migration attempt
         fetchTournaments();
       });
-    
+
     if (currentUser) {
       fetchUserWalletBalance();
     }
@@ -48,27 +48,27 @@ function TournamentList() {
   async function fetchTournaments() {
     try {
       setLoading(true);
-      
+
       // Check and update tournament statuses before fetching
       await TournamentStatusService.checkAndUpdateTournamentStatuses();
-      
+
       const tournamentsCollection = collection(db, 'tournaments');
       const tournamentsSnapshot = await getDocs(tournamentsCollection);
       const tournamentsList = tournamentsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         // Check if current user has joined this tournament
-        hasJoined: currentUser ? 
-          doc.data().participants?.some(p => p.userId === currentUser.uid) : 
+        hasJoined: currentUser ?
+          doc.data().participants?.some(p => p.userId === currentUser.uid) :
           false
       }));
-      
+
       // Sort tournaments: upcoming first, then live, then completed
       tournamentsList.sort((a, b) => {
         const statusOrder = { 'upcoming': 0, 'live': 1, 'completed': 2 };
         return statusOrder[a.status] - statusOrder[b.status];
       });
-      
+
       setTournaments(tournamentsList);
       filterTournaments(tournamentsList, activeCategory);
     } catch (error) {
@@ -115,17 +115,17 @@ function TournamentList() {
     try {
       // Set joining state to true to prevent multiple clicks
       setIsJoining(true);
-      
+
       // Validate username
       if (!username.trim()) {
         setUsernameError('Username is required');
         setIsJoining(false);
         return;
       }
-      
+
       // Sanitize username input
       const sanitizedUsername = DOMPurify.sanitize(username.trim());
-      
+
       // Validate username length and characters
       if (sanitizedUsername.length < 3 || sanitizedUsername.length > 20) {
         setUsernameError('Username must be between 3 and 20 characters');
@@ -134,8 +134,8 @@ function TournamentList() {
       }
 
       // Check if username is already taken in this tournament
-      if (currentTournament.participants && currentTournament.participants.some(p => 
-          p.username && p.username.toLowerCase() === sanitizedUsername.toLowerCase())) {
+      if (currentTournament.participants && currentTournament.participants.some(p =>
+        p.username && p.username.toLowerCase() === sanitizedUsername.toLowerCase())) {
         setUsernameError('This username is already taken in this tournament. Please choose a different one.');
         setIsJoining(false);
         return;
@@ -158,7 +158,7 @@ function TournamentList() {
       // Update user's wallet balance
       const userRef = doc(db, 'users', currentUser.uid);
       const newBalance = walletBalance - currentTournament.entryFee;
-      
+
       await updateDoc(userRef, {
         walletBalance: newBalance,
         joinedTournaments: arrayUnion(currentTournament.id)
@@ -201,7 +201,7 @@ function TournamentList() {
       <div className="tournaments-header">
         <h1>Tournaments</h1>
         <div className="whatsapp-announcement">
-          Join on Whatsapp Channel for announcements: <a href= https://chat.whatsapp.com/DEU72h2MuGjDTOjJlcSCpa target="_blank" rel="noopener noreferrer"> https://chat.whatsapp.com/DEU72h2MuGjDTOjJlcSCpa</a>
+          Join on Whatsapp Channel for announcements: <a href={"https://whatsapp.com/channel/0029VbBMC8f1t90YcV2HDY2t"} target="_blank" rel="noopener noreferrer">https://whatsapp.com/channel/0029VbBMC8f1t90YcV2HDY2t</a>
         </div>
         {currentUser && (
           <div className="text-start text-md-end wallet-balance">
@@ -209,13 +209,13 @@ function TournamentList() {
           </div>
         )}
       </div>
-      
+
       {error && <Alert variant="danger" className="p-2 small" onClose={() => setError('')} dismissible>{error}</Alert>}
-      
+
       {/* Tournament Categories Mini Navbar */}
       <Nav className="tournament-categories-nav mb-4" variant="pills">
         <Nav.Item>
-          <Nav.Link 
+          <Nav.Link
             className={activeCategory === 'all' ? 'active' : ''}
             onClick={() => handleCategoryChange('all')}
           >
@@ -223,7 +223,7 @@ function TournamentList() {
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link 
+          <Nav.Link
             className={activeCategory === 'upcoming' ? 'active' : ''}
             onClick={() => handleCategoryChange('upcoming')}
           >
@@ -231,7 +231,7 @@ function TournamentList() {
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link 
+          <Nav.Link
             className={activeCategory === 'live' ? 'active' : ''}
             onClick={() => handleCategoryChange('live')}
           >
@@ -239,7 +239,7 @@ function TournamentList() {
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link 
+          <Nav.Link
             className={activeCategory === 'completed' ? 'active' : ''}
             onClick={() => handleCategoryChange('completed')}
           >
@@ -247,7 +247,7 @@ function TournamentList() {
           </Nav.Link>
         </Nav.Item>
       </Nav>
-      
+
       {loading ? (
         <p className="small">Loading tournaments...</p>
       ) : (
@@ -269,18 +269,18 @@ function TournamentList() {
                   <Card.Body>
                     {tournament.gameLogo && (
                       <div className="text-center mb-3">
-                        <img 
-                          src={tournament.gameLogo} 
-                          alt="Game Logo" 
-                          style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }} 
+                        <img
+                          src={tournament.gameLogo}
+                          alt="Game Logo"
+                          style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }}
                           className="game-logo-img"
                         />
                       </div>
                     )}
                     <Card.Title>{tournament.gameName}</Card.Title>
                     <Card.Text>
-                      <strong>Date & Time:</strong> {tournament.tournamentDate?.toDate 
-                        ? tournament.tournamentDate.toDate().toLocaleDateString() 
+                      <strong>Date & Time:</strong> {tournament.tournamentDate?.toDate
+                        ? tournament.tournamentDate.toDate().toLocaleDateString()
                         : 'N/A'} {tournament.tournamentTime ? new Date(`2000-01-01T${tournament.tournamentTime}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) : ''}
                       <br />
                       <strong>Entry Fee:</strong> Rs. {tournament.entryFee}
@@ -307,7 +307,7 @@ function TournamentList() {
                         </>
                       )}
                     </Card.Text>
-                    
+
                     {tournament.status === 'live' && tournament.matchDetails && (
                       <div className="match-details-alert">
                         <div className="match-details-content">
@@ -316,7 +316,7 @@ function TournamentList() {
                         </div>
                       </div>
                     )}
-                    
+
                     {tournament.status === 'upcoming' && tournament.hasJoined && tournament.matchDetails && (
                       <div className="match-details-alert info">
                         <div className="match-details-content">
@@ -325,7 +325,7 @@ function TournamentList() {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="tournament-actions">
                       {currentUser ? (
                         tournament.hasJoined ? (
@@ -333,7 +333,7 @@ function TournamentList() {
                             Already Joined
                           </Button>
                         ) : (
-                          <Button 
+                          <Button
                             variant="primary"
                             className="w-100"
                             disabled={tournament.status !== 'upcoming' || tournament.participants?.length >= tournament.maxParticipants}
@@ -347,8 +347,8 @@ function TournamentList() {
                           Login to Join
                         </Button>
                       )}
-                      
-                      <Button 
+
+                      <Button
                         variant="outline-info"
                         className="w-100"
                         onClick={() => navigate(`/tournaments/${tournament.id}`)}
@@ -366,7 +366,7 @@ function TournamentList() {
           )}
         </Row>
       )}
-      
+
       {/* Join Tournament Modal */}
       <Modal show={showJoinModal} onHide={() => setShowJoinModal(false)} centered className="join-tournament-modal responsive-modal">
         <Modal.Header closeButton className="py-2 px-3">
@@ -377,42 +377,42 @@ function TournamentList() {
             <Form>
               <p className="fw-bold mb-2 small">{currentTournament.gameName}</p>
               <p className="mb-3 small">Are you sure you want to join this tournament?</p>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label className="small">Entry Fee</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  value={`Rs. ${currentTournament.entryFee}`} 
-                  disabled 
+                <Form.Control
+                  type="text"
+                  value={`Rs. ${currentTournament.entryFee}`}
+                  disabled
                   className="form-control-sm"
                 />
               </Form.Group>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label className="small">Your Wallet Balance</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  value={`Rs. ${walletBalance}`} 
-                  disabled 
+                <Form.Control
+                  type="text"
+                  value={`Rs. ${walletBalance}`}
+                  disabled
                   className="form-control-sm"
                 />
               </Form.Group>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label className="small">Balance After Joining</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  value={`Rs. ${walletBalance - currentTournament.entryFee}`} 
-                  disabled 
+                <Form.Control
+                  type="text"
+                  value={`Rs. ${walletBalance - currentTournament.entryFee}`}
+                  disabled
                   className="form-control-sm"
                 />
               </Form.Group>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label className="small">Game UserName <span className="text-danger">*</span></Form.Label>
-                <Form.Control 
-                  type="text" 
-                  placeholder="Enter your correct in-game username" 
+                <Form.Control
+                  type="text"
+                  placeholder="Enter your correct in-game username"
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
@@ -425,11 +425,11 @@ function TournamentList() {
                 <Form.Control.Feedback type="invalid">
                   {usernameError}
                 </Form.Control.Feedback>
-                <Form.Text className="text-muted" style={{fontSize: '0.75rem'}}>
+                <Form.Text className="text-muted" style={{ fontSize: '0.75rem' }}>
                   This is the username that will be used to identify you in the tournament.
                 </Form.Text>
               </Form.Group>
-              
+
               {walletBalance < currentTournament.entryFee && (
                 <Alert variant="danger" className="p-2 small">
                   Insufficient balance. Please add funds to your wallet.
@@ -442,8 +442,8 @@ function TournamentList() {
           <Button variant="secondary" onClick={() => setShowJoinModal(false)} size="sm" className="px-3">
             Cancel
           </Button>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={handleJoinTournament}
             disabled={!currentTournament || walletBalance < currentTournament.entryFee || isJoining}
             size="sm"

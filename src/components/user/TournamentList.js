@@ -201,7 +201,7 @@ function TournamentList() {
       <div className="tournaments-header">
         <h1>Tournaments</h1>
         <div className="whatsapp-announcement">
-          Join on Whatsapp Channel for announcements: <a href="https://whatsapp.com/channel/0029VbBMC8f1t90YcV2HDY2t" target="_blank" rel="noopener noreferrer">https://whatsapp.com/channel/0029VbBMC8f1t90YcV2HDY2t</a>
+          Join on Whatsapp Channel for announcements: <a href= https://chat.whatsapp.com/DEU72h2MuGjDTOjJlcSCpa target="_blank" rel="noopener noreferrer"> https://chat.whatsapp.com/DEU72h2MuGjDTOjJlcSCpa</a>
         </div>
         {currentUser && (
           <div className="text-start text-md-end wallet-balance">

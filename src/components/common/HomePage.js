@@ -5,8 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 
-// Import placeholder image
-import heroPlaceholder from '../../assets/hero-background-optimized.jpg';
+
 
 // Import gaming styles
 import './HomePage.css';
@@ -18,34 +17,35 @@ function HomePage() {
   const [featuredTournaments, setFeaturedTournaments] = useState([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Preload the hero background image and fetch featured tournaments
   useEffect(() => {
     // Preload hero image
     const img = new Image();
-    img.src = require('../../assets/hero-background-optimized.jpg');
+    const heroImageUrl = 'https://image2url.com/r2/default/images/1769319206028-55ef5ffc-b947-476b-b8be-19a023cafe40.png';
+    img.src = heroImageUrl;
     img.onload = () => {
       // Once the image is loaded, update the CSS variable
       document.documentElement.style.setProperty(
-        '--hero-background', 
-        `url(${img.src})`
+        '--hero-background',
+        `url(${heroImageUrl})`
       );
       setHeroLoaded(true);
     };
-    
+
     // Fetch featured tournaments
     fetchFeaturedTournaments();
   }, []);
-  
+
   async function fetchFeaturedTournaments() {
     try {
       setLoadingFeatured(true);
       setError('');
-      
+
       // Get featured tournaments from adminSettings collection
       const featuredDoc = doc(db, 'adminSettings', 'featuredTournaments');
       const featuredSnapshot = await getDoc(featuredDoc);
-      
+
       if (featuredSnapshot.exists()) {
         const featuredData = featuredSnapshot.data();
         // Sort by displayOrder
@@ -88,10 +88,9 @@ function HomePage() {
             <Col md={6}>
               <div className="hero-image-container">
                 {/* Placeholder with lazy-loaded image */}
-                <img 
-                  src={heroPlaceholder}
-                  data-src={require('../../assets/hero-background-optimized.jpg')}
-                  alt="PUBG Tournament" 
+                <img
+                  src="https://image2url.com/r2/default/images/1769319206028-55ef5ffc-b947-476b-b8be-19a023cafe40.png"
+                  alt="PUBG Tournament"
                   className={`img-fluid rounded shadow ${heroLoaded ? 'fade-in' : ''}`}
                   loading="eager"
                   width="600"
@@ -107,7 +106,7 @@ function HomePage() {
       <Container className="py-5">
         <h2 className="gaming-section-title">Featured Tournaments</h2>
         {error && <Alert variant="danger" className="text-center">{error}</Alert>}
-        
+
         {loadingFeatured ? (
           <div className="text-center p-4">Loading tournaments...</div>
         ) : featuredTournaments.length === 0 ? (
@@ -129,10 +128,10 @@ function HomePage() {
                         <Card.Body>
                           {tournament.gameLogo && (
                             <div className="text-center mb-3">
-                              <img 
-                                src={tournament.gameLogo} 
-                                alt="Game Logo" 
-                                style={{ maxHeight: '100px', maxWidth: '100%', objectFit: 'contain' }} 
+                              <img
+                                src={tournament.gameLogo}
+                                alt="Game Logo"
+                                style={{ maxHeight: '100px', maxWidth: '100%', objectFit: 'contain' }}
                                 className="game-logo-img"
                               />
                             </div>
@@ -155,14 +154,14 @@ function HomePage() {
                             <Button className="gaming-btn">View Details</Button>
                           </Link>
                         </Card.Body>
-                        <Card.Footer 
-                          className={`${tournament.status === 'live' ? 'live' : 
-                                      tournament.status === 'completed' ? 'bg-secondary text-white' : 
-                                      'text-muted'}`}
+                        <Card.Footer
+                          className={`${tournament.status === 'live' ? 'live' :
+                            tournament.status === 'completed' ? 'bg-secondary text-white' :
+                              'text-muted'}`}
                         >
-                          {tournament.status === 'upcoming' ? 'Registration open' : 
-                           tournament.status === 'live' ? 'LIVE NOW' : 
-                           'Tournament ended'}
+                          {tournament.status === 'upcoming' ? 'Registration open' :
+                            tournament.status === 'live' ? 'LIVE NOW' :
+                              'Tournament ended'}
                         </Card.Footer>
                       </Card>
                     </div>

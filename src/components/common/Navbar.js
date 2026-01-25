@@ -20,7 +20,7 @@ function NavigationBar() {
     <Navbar className="navbar-gradient" variant="dark" expand="lg" sticky="top">
       <Container>
         <Navbar.Brand as={Link} to="/" className="py-2">
-          Game Arena
+          BattleZoneArena
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">

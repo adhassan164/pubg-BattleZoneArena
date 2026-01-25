@@ -9,7 +9,7 @@ function Footer() {
           <Col xs={12} sm={6} md={4} className="mb-3 mb-md-0">
             <h5 className="mb-3">PUBG Tournaments</h5>
             <p className="text-muted">
-              Join exciting tournaments for PUBG, 8 Ball Pool, and other multiplayer games.
+              Join exciting tournaments forPUBG, Free Fire and multiplayer games
             </p>
           </Col>
           <Col xs={12} sm={6} md={4} className="mb-3 mb-md-0">
@@ -28,12 +28,12 @@ function Footer() {
               {/* Discord: PUBGTournaments#1234 */}
             </p>
              <p className="text-muted">
-              join on Whatsapp group for Pubg Game announcements: https:https://chat.whatsapp.com/IiBXpGYmhQm6s0kI7mEfVD?mode=ac_t<br />
+              join on Whatsapp group for Pubg Game announcements:  https://chat.whatsapp.com/DEU72h2MuGjDTOjJlcSCpa<br />
               {/* Discord: PUBGTournaments#1234 */}
             </p>
            
              <p className="text-muted">
-              join on Whatsapp group for Free Fire Game announcements: https://chat.whatsapp.com/InEuN9DrYHwEke6UN7Uz4S?mode=ac_t<br />
+              join on Whatsapp group for Free Fire Game announcements:  https://chat.whatsapp.com/E13OvTjv6GTG5b8BhDlmyP<br />
               {/* Discord: PUBGTournaments#1234 */}
             </p>
           </Col>
@@ -42,7 +42,7 @@ function Footer() {
         <Row>
           <Col className="text-center">
             <p className="mb-0 text-muted small">
-              &copy; {new Date().getFullYear()} PUBG Tournaments. All rights reserved.
+              &copy; {new Date().getFullYear()} All rights reserved BattleZoneArena
             </p>
           </Col>
         </Row>

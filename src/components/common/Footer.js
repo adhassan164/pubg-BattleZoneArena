@@ -24,7 +24,7 @@ function Footer() {
           <Col xs={12} sm={12} md={4}>
             <h5 className="mb-3">Contact Us</h5>
             <p className="text-muted">
-              Email: gamearena.pk@gmail.com<br />
+              Email: battlezonearena398@gmail.com<br />
               {/* Discord: PUBGTournaments#1234 */}
             </p>
              <p className="text-muted">
